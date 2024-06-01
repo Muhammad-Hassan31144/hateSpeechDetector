@@ -1,6 +1,6 @@
 
 joblib
-googletrans
+translate
 streamlit
 tensorflow
 numpy
