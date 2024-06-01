@@ -8,7 +8,7 @@ from preprocessing import preprocess_text
 from translate import translate_text  # Import the translation function
 
 # Configure logging
-logging.basicConfig(filename='app.log', level=logging.ERROR)
+logging.basicConfig(filename='app.log', level=logging.DEBUG)  # Changed to DEBUG for more detailed logs
 
 # Hardcoded labels dictionary
 labels_dict = {
@@ -72,8 +72,11 @@ if st.button('Evaluate Test Text'):
     if test_text:
         if model:
             try:
+                logging.debug(f"Evaluating test text: {test_text}")
                 translated_text = translate_text(test_text)  # Translate the text
+                logging.debug(f"Translated text: {translated_text}")
                 preprocessed_text = preprocess_text(translated_text)
+                logging.debug(f"Preprocessed text: {preprocessed_text}")
                 vectorized_text = vectorizer.transform([preprocessed_text])
                 prediction = model.predict(vectorized_text.toarray())
                 
@@ -86,6 +89,7 @@ if st.button('Evaluate Test Text'):
                     st.write(f'Test Text: {test_text}')
                     st.write(f'Translated Text: {translated_text}')
                     st.write(f'Prediction: {predicted_label}')
+                    logging.debug(f"Prediction result: {predicted_label}")
                 else:
                     st.error(f"Labels not found for model: {model_name}")
             except Exception as e:
@@ -104,8 +108,11 @@ if st.button('Evaluate Custom Text'):
     if user_input:
         if model:
             try:
+                logging.debug(f"Evaluating custom text: {user_input}")
                 translated_text = translate_text(user_input)  # Translate the text
+                logging.debug(f"Translated custom text: {translated_text}")
                 preprocessed_text = preprocess_text(translated_text)
+                logging.debug(f"Preprocessed custom text: {preprocessed_text}")
                 vectorized_text = vectorizer.transform([preprocessed_text])
                 prediction = model.predict(vectorized_text.toarray())
                 
@@ -118,6 +125,7 @@ if st.button('Evaluate Custom Text'):
                     st.write(f'Custom Text: {user_input}')
                     st.write(f'Translated Text: {translated_text}')
                     st.write(f'Prediction: {predicted_label}')
+                    logging.debug(f"Custom prediction result: {predicted_label}")
                 else:
                     st.error(f"Labels not found for model: {model_name}")
             except Exception as e:
