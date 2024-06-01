@@ -3,7 +3,11 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 import joblib
+import logging
 from preprocessing import preprocess_text
+
+# Configure logging
+logging.basicConfig(filename='app.log', level=logging.ERROR)
 
 # Hardcoded labels dictionary
 labels_dict = {
@@ -26,6 +30,7 @@ def load_model_and_vectorizer(model_path, vectorizer_path):
         return model, vectorizer
     except Exception as e:
         st.error(f"Error loading model or vectorizer: {e}")
+        logging.error(f"Error loading model or vectorizer: {e}")
         return None, None
 
 # Load the model and vectorizer
@@ -66,19 +71,20 @@ if st.button('Evaluate Test Text'):
                 preprocessed_text = preprocess_text(test_text)
                 vectorized_text = vectorizer.transform([preprocessed_text])
                 prediction = model.predict(vectorized_text.toarray())
-
+                
                 model_name = model_path.split('/')[-1]
                 if model_name in labels_dict:
                     labels = labels_dict[model_name]
                     predicted_label = labels[np.argmax(prediction[0])]
-
+                    
                     st.subheader('Results:')
                     st.write(f'Test Text: {test_text}')
                     st.write(f'Prediction: {predicted_label}')
                 else:
                     st.error(f"Labels not found for model: {model_name}")
-            except ValueError as e:
-                st.error(f"Error in text processing: {e}")
+            except Exception as e:
+                st.error("An error occurred during text processing or prediction.")
+                logging.error(f"Error during text processing or prediction: {e}")
         else:
             st.error('Model not loaded. Please check the model path and file.')
     else:
@@ -95,19 +101,20 @@ if st.button('Evaluate Custom Text'):
                 preprocessed_text = preprocess_text(user_input)
                 vectorized_text = vectorizer.transform([preprocessed_text])
                 prediction = model.predict(vectorized_text.toarray())
-
+                
                 model_name = model_path.split('/')[-1]
                 if model_name in labels_dict:
                     labels = labels_dict[model_name]
                     predicted_label = labels[np.argmax(prediction[0])]
-
+                    
                     st.subheader('Results:')
                     st.write(f'Custom Text: {user_input}')
                     st.write(f'Prediction: {predicted_label}')
                 else:
                     st.error(f"Labels not found for model: {model_name}")
-            except ValueError as e:
-                st.error(f"Error in text processing: {e}")
+            except Exception as e:
+                st.error("An error occurred during text processing or prediction.")
+                logging.error(f"Error during text processing or prediction: {e}")
         else:
             st.error('Model not loaded. Please check the model path and file.')
     else:
