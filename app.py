@@ -8,7 +8,7 @@ from preprocessing import preprocess_text
 from translate import translate_text  # Import the translation function
 
 # Configure logging
-logging.basicConfig(filename='app.log', level=logging.DEBUG)  # Change to DEBUG level
+logging.basicConfig(filename='app.log', level=logging.ERROR)
 
 # Hardcoded labels dictionary
 labels_dict = {
@@ -20,11 +20,9 @@ labels_dict = {
 def load_model_and_vectorizer(model_path, vectorizer_path):
     if not os.path.exists(model_path):
         st.error(f"Model file not found: {model_path}")
-        logging.error(f"Model file not found: {model_path}")
         return None, None
     if not os.path.exists(vectorizer_path):
         st.error(f"Vectorizer file not found: {vectorizer_path}")
-        logging.error(f"Vectorizer file not found: {vectorizer_path}")
         return None, None
     
     try:
@@ -74,15 +72,10 @@ if st.button('Evaluate Test Text'):
     if test_text:
         if model:
             try:
-                logging.debug(f"Selected test text: {test_text}")
                 translated_text = translate_text(test_text)  # Translate the text
-                logging.debug(f"Translated text: {translated_text}")
                 preprocessed_text = preprocess_text(translated_text)
-                logging.debug(f"Preprocessed text: {preprocessed_text}")
                 vectorized_text = vectorizer.transform([preprocessed_text])
-                logging.debug(f"Vectorized text shape: {vectorized_text.shape}")
                 prediction = model.predict(vectorized_text.toarray())
-                logging.debug(f"Prediction: {prediction}")
                 
                 model_name = model_path.split('/')[-1]
                 if model_name in labels_dict:
@@ -95,10 +88,9 @@ if st.button('Evaluate Test Text'):
                     st.write(f'Prediction: {predicted_label}')
                 else:
                     st.error(f"Labels not found for model: {model_name}")
-                    logging.error(f"Labels not found for model: {model_name}")
             except Exception as e:
                 st.error("An error occurred during text processing or prediction.")
-                logging.error(f"Error during text processing or prediction: {e}", exc_info=True)
+                logging.error(f"Error during text processing or prediction: {e}")
         else:
             st.error('Model not loaded. Please check the model path and file.')
     else:
@@ -112,15 +104,10 @@ if st.button('Evaluate Custom Text'):
     if user_input:
         if model:
             try:
-                logging.debug(f"User input text: {user_input}")
                 translated_text = translate_text(user_input)  # Translate the text
-                logging.debug(f"Translated text: {translated_text}")
                 preprocessed_text = preprocess_text(translated_text)
-                logging.debug(f"Preprocessed text: {preprocessed_text}")
                 vectorized_text = vectorizer.transform([preprocessed_text])
-                logging.debug(f"Vectorized text shape: {vectorized_text.shape}")
                 prediction = model.predict(vectorized_text.toarray())
-                logging.debug(f"Prediction: {prediction}")
                 
                 model_name = model_path.split('/')[-1]
                 if model_name in labels_dict:
@@ -133,10 +120,9 @@ if st.button('Evaluate Custom Text'):
                     st.write(f'Prediction: {predicted_label}')
                 else:
                     st.error(f"Labels not found for model: {model_name}")
-                    logging.error(f"Labels not found for model: {model_name}")
             except Exception as e:
                 st.error("An error occurred during text processing or prediction.")
-                logging.error(f"Error during text processing or prediction: {e}", exc_info=True)
+                logging.error(f"Error during text processing or prediction: {e}")
         else:
             st.error('Model not loaded. Please check the model path and file.')
     else:
