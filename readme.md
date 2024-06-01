@@ -22,6 +22,7 @@ The goal of this project was to train a deep feedforward neural network to detec
 - **Predefined Test Texts**: Evaluate predefined texts from each category.
 - **Custom Text Evaluation**: Allows users to input custom text for evaluation.
 - **Interactive Interface**: User-friendly interface built with Streamlit.
+- **Security Validations**: Enhanced security checks to prevent harmful content.
 
 ## Installation
 
@@ -50,16 +51,17 @@ The goal of this project was to train a deep feedforward neural network to detec
 ## Challenges Solved
 
 1. **Model Training**: Trained a deep feedforward neural network to classify text into hate speech, offensive language, and not hate speech categories.
-2. **Text Preprocessing**: Implemented a robust text preprocessing pipeline that includes tokenization, lemmatization, and removal of stopwords.
+2. **Text Preprocessing**: Implemented a robust text preprocessing pipeline that includes validation for harmful content.
 3. **Model Deployment**: Successfully deployed the trained model in a web application using Streamlit.
 4. **User Interface**: Created an interactive and user-friendly interface for the model, allowing both predefined and custom text evaluation.
 
 ## Files
 
 - `app.py`: Main application script for the web app.
-- `preprocessing.py`: Contains the text preprocessing functions.
+- `preprocessing.py`: Contains the text preprocessing functions with security validations.
 - `requirements.txt`: List of required Python packages.
 - `models/`: Directory containing the trained model (`deepfeedforward_model.h5`) and the TF-IDF vectorizer (`tfidf_vectorizer.joblib`).
+
 
 ## Acknowledgments
 
