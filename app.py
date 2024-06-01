@@ -5,6 +5,7 @@ import numpy as np
 import joblib
 import logging
 from preprocessing import preprocess_text
+from translate import translate_text  # Import the translation function
 
 # Configure logging
 logging.basicConfig(filename='app.log', level=logging.ERROR)
@@ -43,19 +44,22 @@ st.title('Hate Speech Detection')
 # Predefined test texts
 test_texts = {
     'not_hate_speech': [
-        "I love spending time with my family during the holidays.",
-        "The weather is beautiful today.",
-        "Let's work together to build a better community."
+        "I love spending time with my family during the holidays.",  # English
+        "आज मौसम बहुत सुहाना है।",  # Hindi: "The weather is beautiful today."
+        "Vamos a trabajar juntos para construir una mejor comunidad.",  # Spanish: "Let's work together to build a better community."
+        "چھٹیاں گزارنے کے لئے اپنے خاندان کے ساتھ وقت گزارنا مجھے بہت پسند ہے۔"  # Urdu: "I love spending time with my family during the holidays."
     ],
     'offensive_language': [
-        "This is a stupid idea.",
-        "What a moron!",
-        "You are such an idiot."
+        "This is a stupid idea.",  # English
+        "यह एक बेवकूफी भरा विचार है।",  # Hindi: "This is a stupid idea."
+        "¡Qué idiota!",  # Spanish: "What an idiot!"
+        "تم کتنے بیوقوف ہو!"  # Urdu: "You are such an idiot."
     ],
     'hate_speech': [
-        "I hate people from that country.",
-        "Those people are not welcome here.",
-        "Go back to where you came from."
+        "I hate people from that country.",  # English
+        "मुझे उस देश के लोग पसंद नहीं हैं।",  # Hindi: "I don't like people from that country."
+        "Esas personas no son bienvenidas aquí.",  # Spanish: "Those people are not welcome here."
+        "واپس جاؤ جہاں سے آئے ہو۔"  # Urdu: "Go back to where you came from."
     ]
 }
 
@@ -68,7 +72,8 @@ if st.button('Evaluate Test Text'):
     if test_text:
         if model:
             try:
-                preprocessed_text = preprocess_text(test_text)
+                translated_text = translate_text(test_text)  # Translate the text
+                preprocessed_text = preprocess_text(translated_text)
                 vectorized_text = vectorizer.transform([preprocessed_text])
                 prediction = model.predict(vectorized_text.toarray())
                 
@@ -79,6 +84,7 @@ if st.button('Evaluate Test Text'):
                     
                     st.subheader('Results:')
                     st.write(f'Test Text: {test_text}')
+                    st.write(f'Translated Text: {translated_text}')
                     st.write(f'Prediction: {predicted_label}')
                 else:
                     st.error(f"Labels not found for model: {model_name}")
@@ -98,7 +104,8 @@ if st.button('Evaluate Custom Text'):
     if user_input:
         if model:
             try:
-                preprocessed_text = preprocess_text(user_input)
+                translated_text = translate_text(user_input)  # Translate the text
+                preprocessed_text = preprocess_text(translated_text)
                 vectorized_text = vectorizer.transform([preprocessed_text])
                 prediction = model.predict(vectorized_text.toarray())
                 
@@ -109,6 +116,7 @@ if st.button('Evaluate Custom Text'):
                     
                     st.subheader('Results:')
                     st.write(f'Custom Text: {user_input}')
+                    st.write(f'Translated Text: {translated_text}')
                     st.write(f'Prediction: {predicted_label}')
                 else:
                     st.error(f"Labels not found for model: {model_name}")
