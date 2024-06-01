@@ -10,7 +10,7 @@ from spellchecker import SpellChecker
 from translate import Translator
 
 # Configure logging
-logging.basicConfig(filename='app.log', level=logging.DEBUG)  # Changed to DEBUG for more detailed logs
+logging.basicConfig(filename='app.log', level=logging.DEBUG)
 
 # Hardcoded labels dictionary
 labels_dict = {
@@ -41,27 +41,25 @@ def load_model_and_vectorizer(model_path, vectorizer_path):
 
 # Text cleaning function
 def clean_text(text):
-    # Basic text cleaning
-    text = re.sub(r'\[.*?\]', '', text)
-    text = re.sub(r'\w*\d\w*', '', text)
-    text = re.sub(r'[%s]' % re.escape(string.punctuation), '', text)
-    text = re.sub(r'\s+', ' ', text)
-    text = re.sub(r'^\s+|\s+?$', '', text.lower())
-    
-    # Spell correction
-    corrected_text = ' '.join([spell.correction(word) for word in text.split()])
-    return corrected_text
+    try:
+        # Basic text cleaning
+        text = re.sub(r'\[.*?\]', '', text)
+        text = re.sub(r'\w*\d\w*', '', text)
+        text = re.sub(r'[%s]' % re.escape(string.punctuation), '', text)
+        text = re.sub(r'\s+', ' ', text)
+        text = re.sub(r'^\s+|\s+?$', '', text.lower())
+
+        # Spell correction
+        corrected_text = ' '.join([spell.correction(word) for word in text.split()])
+        return corrected_text
+    except Exception as e:
+        logging.error(f"Error in clean_text function: {e}")
+        raise e
 
 # Load the model and vectorizer
 model_path = 'models_MLP/deepfeedforward_model.h5'
 vectorizer_path = 'models_MLP/tfidf_vectorizer.joblib'
 model, vectorizer = load_model_and_vectorizer(model_path, vectorizer_path)
-
-st.title('Hate Speech Detection')
-
-# Language selection
-language_options = {'English': 'en', 'Hindi': 'hi', 'Spanish': 'es', 'Urdu': 'ur'}
-language = st.selectbox('Choose the language for translation:', list(language_options.keys()))
 
 # Predefined test texts
 test_texts = {
@@ -85,13 +83,35 @@ test_texts = {
     ]
 }
 
+# Initial model load and evaluation
+if model and vectorizer:
+    try:
+        for category, texts in test_texts.items():
+            for text in texts:
+                try:
+                    logging.debug(f"Processing text: {text}")
+                    cleaned_text = clean_text(text)
+                    logging.debug(f"Cleaned text: {cleaned_text}")
+                    vectorized_text = vectorizer.transform([cleaned_text])
+                    logging.debug(f"Vectorized text: {vectorized_text}")
+                    _ = model.predict(vectorized_text.toarray())
+                except Exception as e:
+                    logging.error(f"Error processing text '{text}': {e}")
+        logging.info("Initial model evaluation with all test texts completed successfully.")
+    except Exception as e:
+        st.error("An error occurred during initial model evaluation.")
+        logging.error(f"Error during initial model evaluation: {e}")
+
+st.title('Hate Speech Detection')
+
+# Language selection
+language_options = {'English': 'en', 'Hindi': 'hi', 'Spanish': 'es', 'Urdu': 'ur'}
+language = st.selectbox('Choose the language for translation:', list(language_options.keys()))
+
 # Display test options
 st.subheader('Test Texts')
 category = st.selectbox('Choose a category to test:', ['Not Hate Speech', 'Offensive Speech', 'Hate Speech'])
 test_text = st.selectbox('Choose a text to evaluate:', test_texts[category])
-
-# Store results
-# results = []
 
 if st.button('Evaluate Test Text'):
     if test_text:
@@ -108,17 +128,20 @@ if st.button('Evaluate Test Text'):
                 
                 labels = labels_dict.get('deepfeedforward_model.h5', ['Not Hate Speech', 'Offensive Speech', 'Hate Speech'])
                 predicted_label = labels[np.argmax(prediction[0])]
-                # st.write(f'Predicted Label: {predicted_label}')
                 st.subheader('Results:')
                 st.write(f'Test Text: {test_text}')
                 st.write(f'Translated Text: {translated_text}')
                 st.write(f'Prediction: {predicted_label}')
                 logging.debug(f"Prediction result: {predicted_label}")
-                
-                # results.append((test_text, translated_text, predicted_label))
             except Exception as e:
-                st.error("An error occurred during text processing or prediction.")
-                logging.error(f"Error during text processing or prediction: {e}")
+                st.error("An error occurred during text processing.")
+                logging.error(f"Error during text processing: {e}")
+            try:
+                logging.debug("Attempting to perform prediction.")
+                prediction = model.predict(vectorized_text.toarray())
+            except Exception as e:
+                st.error("An error occurred during prediction.")
+                logging.error(f"Error during prediction: {e}")
         else:
             st.error('Model not loaded. Please check the model path and file.')
     else:
@@ -143,27 +166,21 @@ if st.button('Evaluate Custom Text'):
                 
                 labels = labels_dict.get('deepfeedforward_model.h5', ['Not Hate Speech', 'Offensive Speech', 'Hate Speech'])
                 predicted_label = labels[np.argmax(prediction[0])]
-                st.write(f'Predicted Label: {predicted_label}')
                 st.subheader('Results:')
                 st.write(f'Custom Text: {user_input}')
                 st.write(f'Translated Text: {translated_text}')
                 st.write(f'Prediction: {predicted_label}')
                 logging.debug(f"Custom prediction result: {predicted_label}")
-                
-                # results.append((user_input, translated_text, predicted_label))
             except Exception as e:
-                st.error("An error occurred during text processing or prediction.")
-                logging.error(f"Error during text processing or prediction: {e}")
+                st.error("An error occurred during text processing.")
+                logging.error(f"Error during text processing: {e}")
+            try:
+                logging.debug("Attempting to perform prediction.")
+                prediction = model.predict(vectorized_text.toarray())
+            except Exception as e:
+                st.error("An error occurred during prediction.")
+                logging.error(f"Error during prediction: {e}")
         else:
             st.error('Model not loaded. Please check the model path and file.')
     else:
         st.error('Please enter some text to evaluate.')
-
-# if st.button('Save Results'):
-#     with open('results.txt', 'w') as f:
-#         for result in results:
-#             f.write(f"Original Text: {result[0]}\n")
-#             f.write(f"Translated Text: {result[1]}\n")
-#             f.write(f"Prediction: {result[2]}\n")
-#             f.write("\n")
-#     st.success('Results saved successfully!')
