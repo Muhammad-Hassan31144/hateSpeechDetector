@@ -72,7 +72,7 @@ if st.button('Evaluate Test Text'):
                 vectorized_text = vectorizer.transform([preprocessed_text])
                 prediction = model.predict(vectorized_text.toarray())
                 
-                model_name = model_path.split('/')[-1]
+                model_name = 'deepfeedforward_model.h5'
                 if model_name in labels_dict:
                     labels = labels_dict[model_name]
                     predicted_label = labels[np.argmax(prediction[0])]
