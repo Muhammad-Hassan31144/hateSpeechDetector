@@ -135,3 +135,10 @@ if st.button('Evaluate Custom Text'):
             st.error('Model not loaded. Please check the model path and file.')
     else:
         st.error('Please enter some text to evaluate.')
+st.write(f"Streamlit version: {st.__version__}")
+st.write(f"TensorFlow version: {tf.__version__}")
+st.write(f"Numpy version: {np.__version__}")
+st.write(f"Joblib version: {joblib.__version__}")
+st.write(f"Scikit-learn version: {sklearn.__version__}")
+st.write(f"Httpcore version: {httpcore.__version__}")
+st.write(f"Googletrans version: {googletrans.__version__}")
