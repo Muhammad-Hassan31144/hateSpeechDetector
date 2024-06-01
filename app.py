@@ -29,8 +29,8 @@ def load_model_and_vectorizer(model_path, vectorizer_path):
         return None, None
 
 # Load the model and vectorizer
-model_path = 'models/deepfeedforward_model.h5'
-vectorizer_path = 'models/tfidf_vectorizer.joblib'
+model_path = './models/deepfeedforward_model.h5'
+vectorizer_path = './models/tfidf_vectorizer.joblib'
 model, vectorizer = load_model_and_vectorizer(model_path, vectorizer_path)
 
 st.title('Hate Speech Detection')
