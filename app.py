@@ -2,35 +2,36 @@ import os
 import streamlit as st
 import tensorflow as tf
 import numpy as np
-import joblib  # Ensure joblib is imported
+import joblib
 from preprocessing import preprocess_text
 
 # Hardcoded labels dictionary
 labels_dict = {
-    'deepfeedforward_model.h5': ['not_hate_speech', 'offensive_language', 'hate_speech']  # Update labels to match your model output
+    'deepfeedforward_model.h5': ['not_hate_speech', 'offensive_language', 'hate_speech']
 }
 
-# Load the deep feedforward model
-model_path = 'models/deepfeedforward_model.h5'
-vectorizer_path = 'models/tfidf_vectorizer.joblib'  # Assuming you saved the vectorizer
-
-if os.path.exists(model_path):
+# Function to load models and vectorizers
+@st.cache_resource
+def load_model_and_vectorizer(model_path, vectorizer_path):
+    if not os.path.exists(model_path):
+        st.error(f"Model file not found: {model_path}")
+        return None, None
+    if not os.path.exists(vectorizer_path):
+        st.error(f"Vectorizer file not found: {vectorizer_path}")
+        return None, None
+    
     try:
         model = tf.keras.models.load_model(model_path)
-        st.success(f"Successfully loaded model: {model_path}")
-    except Exception as e:
-        st.error(f"Error loading model {model_path}: {e}")
-else:
-    st.error(f"Model file not found: {model_path}")
-
-# Load the TF-IDF vectorizer
-if os.path.exists(vectorizer_path):
-    try:
         vectorizer = joblib.load(vectorizer_path)
+        return model, vectorizer
     except Exception as e:
-        st.error(f"Error loading vectorizer {vectorizer_path}: {e}")
-else:
-    st.error(f"Vectorizer file not found: {vectorizer_path}")
+        st.error(f"Error loading model or vectorizer: {e}")
+        return None, None
+
+# Load the model and vectorizer
+model_path = 'models/deepfeedforward_model.h5'
+vectorizer_path = 'models/tfidf_vectorizer.joblib'
+model, vectorizer = load_model_and_vectorizer(model_path, vectorizer_path)
 
 st.title('Hate Speech Detection')
 
@@ -61,21 +62,23 @@ test_text = st.selectbox('Choose a text to evaluate:', test_texts[category])
 if st.button('Evaluate Test Text'):
     if test_text:
         if model:
-            preprocessed_text = preprocess_text(test_text)
-            vectorized_text = vectorizer.transform([preprocessed_text])  # Transform using vectorizer
-            prediction = model.predict(vectorized_text.toarray())  # Ensure input is in array format
-            
-            model_name = model_path.split('/')[-1]
-            if model_name in labels_dict:
-                labels = labels_dict[model_name]
-                
-                predicted_label = labels[np.argmax(prediction[0])]
-                
-                st.subheader('Results:')
-                st.write(f'Test Text: {test_text}')
-                st.write(f'Prediction: {predicted_label}')
-            else:
-                st.error(f"Labels not found for model: {model_name}")
+            try:
+                preprocessed_text = preprocess_text(test_text)
+                vectorized_text = vectorizer.transform([preprocessed_text])
+                prediction = model.predict(vectorized_text.toarray())
+
+                model_name = model_path.split('/')[-1]
+                if model_name in labels_dict:
+                    labels = labels_dict[model_name]
+                    predicted_label = labels[np.argmax(prediction[0])]
+
+                    st.subheader('Results:')
+                    st.write(f'Test Text: {test_text}')
+                    st.write(f'Prediction: {predicted_label}')
+                else:
+                    st.error(f"Labels not found for model: {model_name}")
+            except ValueError as e:
+                st.error(f"Error in text processing: {e}")
         else:
             st.error('Model not loaded. Please check the model path and file.')
     else:
@@ -88,21 +91,23 @@ user_input = st.text_area('Enter text to evaluate:', '')
 if st.button('Evaluate Custom Text'):
     if user_input:
         if model:
-            preprocessed_text = preprocess_text(user_input)
-            vectorized_text = vectorizer.transform([preprocessed_text])  # Transform using vectorizer
-            prediction = model.predict(vectorized_text.toarray())  # Ensure input is in array format
-            
-            model_name = model_path.split('/')[-1]
-            if model_name in labels_dict:
-                labels = labels_dict[model_name]
-                
-                predicted_label = labels[np.argmax(prediction[0])]
-                
-                st.subheader('Results:')
-                st.write(f'Custom Text: {user_input}')
-                st.write(f'Prediction: {predicted_label}')
-            else:
-                st.error(f"Labels not found for model: {model_name}")
+            try:
+                preprocessed_text = preprocess_text(user_input)
+                vectorized_text = vectorizer.transform([preprocessed_text])
+                prediction = model.predict(vectorized_text.toarray())
+
+                model_name = model_path.split('/')[-1]
+                if model_name in labels_dict:
+                    labels = labels_dict[model_name]
+                    predicted_label = labels[np.argmax(prediction[0])]
+
+                    st.subheader('Results:')
+                    st.write(f'Custom Text: {user_input}')
+                    st.write(f'Prediction: {predicted_label}')
+                else:
+                    st.error(f"Labels not found for model: {model_name}")
+            except ValueError as e:
+                st.error(f"Error in text processing: {e}")
         else:
             st.error('Model not loaded. Please check the model path and file.')
     else:
