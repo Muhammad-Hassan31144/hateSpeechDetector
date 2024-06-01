@@ -1,5 +1,8 @@
+
+joblib
+googletrans==4.0.0-rc1
 streamlit
 tensorflow
+numpy
 joblib
-scikit-learn
-googletrans==4.0.0-rc1
+scikit-learn==1.4.2
